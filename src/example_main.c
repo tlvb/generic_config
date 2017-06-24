@@ -20,11 +20,11 @@ static const config_mapping audio_config_map[] = {
 	{ NULL,            0,   0,                              .sm=NULL }  // end
 };
 static const config_mapping config_map[] = {
-	{ "server_host", 's', offsetof(config, host),  .sm=NULL}, // read a string
-	{ "server_port", 'u', offsetof(config, port),  .sm=NULL}, // read an unsigned integer
+	{ "server_host", 's', offsetof(config, host),  .sm=NULL                                                }, // read a string
+	{ "server_port", 'u', offsetof(config, port),  .sm=NULL                                                }, // read an unsigned integer
 	{ "nicklist",    '*', offsetof(config, nicks), .op={read_stringlist, write_stringlist, free_stringlist}}, // more complex type with custom functions
-	{ "audio",       '+', offsetof(config, audio), .sm=audio_config_map,                      }, // subconfig
-	{ NULL,          0,   0,                       .sm=NULL}
+	{ "audio",       '+', offsetof(config, audio), .sm=audio_config_map,                                   }, // subconfig
+	{ NULL,          0,   0,                       .sm=NULL                                                }
 };
 int main(void) {
 

@@ -1,0 +1,37 @@
+How to populate a config struct is decided by one or several
+config_mapping arrays where at each index there is listed:
+* the key that is looked for in the config
+* the type
+* the offset of the field in the target struct
+* one of the following union fields:
+  + sm - a submap for nested structs
+  + op - a struct with three function pointers for reading, writing, and releasing memory of a custom datatype
+
+Five types exist, but they are extensible:
+
+'s'      - string, the rest of the config line is read
+'i', 'u' - signed and unsigned integers, 32 bits are default, but you can change this by changing CFG_INTEGER_BITS
+           to some other 8/16/32/64 value, or set it to e.g. 0 and define a number of custom macros, see config_core.h
+'*'      - custom datatype, you need to provide read/write/memory release functions yourself
+'+'      - nested struct, you need to provide a config submap
+
+The config file format is simple (ws* being zero or more whitespace characters):
+
+ws* KEY ws* = ws* DATA
+
+for s/i/u/* types. s stops at the the end of the line, and the value may thus contain spaces.
+There is enforced ending condition for the custom datatypes.
+
+For nested structs the format is
+
+ws* KEY ws* = ws* { eol
+	SUBSTRUCT
+	...
+ws* } eol
+
+where eol is end of line, and SUBSTRUCT is the appropriate key-value pairs for the substruct, following
+the same format as any other level.
+
+A line where the first non-whitespace character is a '#' is considered a comment and ignored.
+
+The example code shows off both a custom datatype as well as the nesting capability.
