@@ -3,7 +3,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#define CFG_FAIL_IF(expr, ...) if (expr) { fprintf(stderr, __VA_ARGS__); return false; }
+#define CFG_FAIL_IF(expr, ...) if (expr) { fprintf(stderr, "(EE) CONFIG_CORE: " __VA_ARGS__); return false; }
 
 static void _deflate_config(FILE *fd, const void *cfg, const config_mapping *map, size_t indentlevel);
 
