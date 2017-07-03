@@ -12,6 +12,8 @@ Five types exist, but they are extensible:
 's'      - string, the rest of the config line is read
 'i', 'u' - signed and unsigned integers, 32 bits are default, but you can change this by changing CFG_INTEGER_BITS
            to some other 8/16/32/64 value, or set it to e.g. 0 and define a number of custom macros, see config_core.h
+'b'      - boolean (bool), the loaded value depends on if the first value character is 'y' or 'n' (case insensitive)
+           when output is generated either "yes" or "no" (without quotes) will be printed.
 '*'      - custom datatype, you need to provide read/write/memory release functions yourself
 '+'      - nested struct, you need to provide a config submap
 

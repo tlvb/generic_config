@@ -5,6 +5,7 @@
 typedef struct {
 	char *output;
 	char *input;
+	bool vox;
 } audio_config;
 
 typedef struct {
@@ -15,16 +16,17 @@ typedef struct {
 } config;
 
 static const config_mapping audio_config_map[] = {
-	{ "output_device", 's', offsetof(audio_config, output), .sm=NULL }, // string
-	{ "input_device",  's', offsetof(audio_config, input),  .sm=NULL }, // string
-	{ NULL,            0,   0,                              .sm=NULL }  // end
+	{ "output_device",     's', offsetof(audio_config, output), .sm=NULL }, // string
+	{ "input_device",      's', offsetof(audio_config, input),  .sm=NULL }, // string
+	{ "voice_auto_detect", 'b', offsetof(audio_config, vox),    .sm=NULL }, // boolean
+	{  NULL,                0,  0,                              .sm=NULL }  // end
 };
 static const config_mapping config_map[] = {
 	{ "server_host", 's', offsetof(config, host),  .sm=NULL                                                }, // read a string
 	{ "server_port", 'u', offsetof(config, port),  .sm=NULL                                                }, // read an unsigned integer
 	{ "nicklist",    '*', offsetof(config, nicks), .op={read_stringlist, write_stringlist, free_stringlist}}, // more complex type with custom functions
 	{ "audio",       '+', offsetof(config, audio), .sm=audio_config_map,                                   }, // subconfig
-	{ NULL,          0,   0,                       .sm=NULL                                                }
+	{  NULL,          0,  0,                       .sm=NULL                                                }
 };
 int main(void) {
 
@@ -43,6 +45,7 @@ int main(void) {
 		audio = {\n\
 			output_device = default\n\
 			input_device = default\n\
+			voice_auto_detect = no\n\
 		}\n";
 
 	printf("the config string:\n---\n%s\n---\n", cfg_text);

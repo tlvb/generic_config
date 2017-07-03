@@ -34,12 +34,12 @@ bool inflate_config(void *cfg, const config_mapping *map, FILE* fd) { /*{{{*/
 	for (;;) {
 next:		ignore_comment(fd);
 		char key[128];
-		char equals[2];
+		char tmp[2];
 		key[0] = '\0';
 		int kret = 0;
-		kret = fscanf(fd, " %2[}]", (char*)&key);
+		kret = fscanf(fd, " %2[}]", (char*)&tmp);
 		if (kret == 1) { return true; }
-		kret = fscanf(fd, " %128[^= ] %2[=]", (char*)&key, (char*)&equals);
+		kret = fscanf(fd, " %128[^= ] %2[=]", (char*)&key, (char*)&tmp);
 		if (kret == EOF) { return true; }
 		CFG_FAIL_IF(kret != 2, "parse error: an expected key was not followed by an expected equals sign or opening bracket (%d, %s)\n", kret, key);
 		const config_mapping *nbq = map;
@@ -47,14 +47,19 @@ next:		ignore_comment(fd);
 			if (!strcmp(nbq->field_key, key)) {
 				bool vret = false;
 				switch(nbq->field_type) {
-					case 'u':
-						vret = 1 == fscanf(fd, " %" CFG_SCNu,  (CFG_UINT*)reconstruct_ptr(cfg, nbq->field_offset));
+					case 's':
+						vret = 1 == fscanf(fd, " %m[^\n]",  (char**)reconstruct_ptr(cfg, nbq->field_offset));
 						break;
 					case 'i':
 						vret = 1 == fscanf(fd, " %" CFG_SCNi, (CFG_INT*)reconstruct_ptr(cfg, nbq->field_offset));
 						break;
-					case 's':
-						vret = 1 == fscanf(fd, " %m[^\n]",  (char**)reconstruct_ptr(cfg, nbq->field_offset));
+					case 'u':
+						vret = 1 == fscanf(fd, " %" CFG_SCNu,  (CFG_UINT*)reconstruct_ptr(cfg, nbq->field_offset));
+						break;
+					case 'b':
+						vret = 1 == fscanf(fd, " %2[yYnN]", (char*)&tmp);
+						*(bool*)reconstruct_ptr(cfg, nbq->field_offset) = tmp[0] == 'y' || tmp[0] == 'Y';
+						ignore_until_eol(fd);
 						break;
 					case '*':
 						vret = nbq->op.r(reconstruct_ptr(cfg, nbq->field_offset), fd);
@@ -97,6 +102,14 @@ void _deflate_config(FILE *fd, const void *cfg, const config_mapping *map, size_
 				break;
 			case 'u':
 				fprintf(fd, "%" CFG_PRIu "\n", *((const CFG_UINT*)reconstruct_cptr(cfg, map->field_offset)));
+				break;
+			case 'b':
+				if (*((const bool*)reconstruct_cptr(cfg, map->field_offset))) {
+					fprintf(fd, "yes\n");
+				}
+				else {
+					fprintf(fd, "no\n");
+				}
 				break;
 			case '*':
 				map->op.w(fd, reconstruct_cptr(cfg, map->field_offset), indentlevel);
